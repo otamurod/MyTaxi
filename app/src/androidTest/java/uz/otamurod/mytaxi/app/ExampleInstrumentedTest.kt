@@ -1,4 +1,4 @@
-package uz.otamurod.data
+package uz.otamurod.mytaxi.app
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("uz.otamurod.data.test", appContext.packageName)
+        assertEquals("uz.otamurod.mytaxi", appContext.packageName)
     }
 }

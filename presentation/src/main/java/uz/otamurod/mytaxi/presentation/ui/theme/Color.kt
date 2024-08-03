@@ -1,4 +1,4 @@
-package uz.otamurod.mytaxi.ui.theme
+package uz.otamurod.mytaxi.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,4 +1,4 @@
-package uz.otamurod.data
+package uz.otamurod.mytaxi.presentation
 
 import org.junit.Test
 
