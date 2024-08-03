@@ -23,3 +23,4 @@ rootProject.name = "MyTaxi"
 include(":app")
 include(":data")
 include(":domain")
+include(":presentation")
