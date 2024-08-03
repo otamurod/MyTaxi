@@ -16,7 +16,6 @@ ksp = "1.9.24-1.0.20"
 koin = "3.5.3"
 koinCompose = "3.5.3"
 room = "2.6.1"
-googleGmsGoogleServices = "4.4.2"
 coroutines = "1.8.0"
 
 [libraries]
