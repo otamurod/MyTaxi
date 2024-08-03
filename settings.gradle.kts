@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MyTaxi"
 include(":app")
- 
+include(":data")
