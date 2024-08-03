@@ -1,4 +1,4 @@
-package uz.otamurod.mytaxi.presentation
+package uz.otamurod.mytaxi.presentation.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
