@@ -51,12 +51,23 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    implementation(libs.voyager.navigator)
+    implementation(libs.voyager.tab.navigator)
+    implementation(libs.voyager.bottom.sheet.navigator)
+    implementation(libs.voyager.transitions)
+
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.android.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
