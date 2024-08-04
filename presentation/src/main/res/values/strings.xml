@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">MyTaxi</string>
+    <string name="foreground_service_notification_title">Foreground Service Is Accessing Location</string>
+    <string name="foreground_service_notification_description">MyTaxi app app is running in the background.</string>
+    <string name="foreground_service_notification_channel_general_name">General notification</string>
 </resources>
