@@ -45,6 +45,7 @@ class HomeScreenReducer :
         data class SwitchTab(val isActiveTab: Boolean) : HomeEvent()
         data class ChangeMapZoom(val zoom: Float) : HomeEvent()
         data class ShowUserLocation(val liveLocation: LiveLocation) : HomeEvent()
+        data class UpdateUserLocation(val liveLocation: LiveLocation) : HomeEvent()
         data class ToggleBottomDialog(val shouldDisplay: Boolean) : HomeEvent()
         data class ToggleMapItemsVisibility(val shouldHideItems: Boolean) : HomeEvent()
         data class GrantLocationPermission(val isGranted: Boolean) : HomeEvent()
@@ -71,6 +72,10 @@ class HomeScreenReducer :
             }
 
             is HomeEvent.ShowUserLocation -> {
+                previousState.copy(userLiveLocation = event.liveLocation)
+            }
+
+            is HomeEvent.UpdateUserLocation -> {
                 previousState.copy(userLiveLocation = event.liveLocation)
             }
 

@@ -1,6 +1,10 @@
 package uz.otamurod.mytaxi.presentation.ui.home
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import uz.otamurod.mytaxi.domain.interactor.LiveLocationInteractor
+import uz.otamurod.mytaxi.domain.model.LiveLocation
 import uz.otamurod.mytaxi.presentation.ui.base.BaseViewModel
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEffect
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEvent
@@ -13,4 +17,11 @@ class HomeViewModel(
     reducer = HomeScreenReducer()
 ) {
 
+    fun saveLocation(location: LiveLocation) {
+        viewModelScope.launch(Dispatchers.IO) {
+            liveLocationInteractor.saveLiveLocation(
+                liveLocation = location
+            )
+        }
+    }
 }

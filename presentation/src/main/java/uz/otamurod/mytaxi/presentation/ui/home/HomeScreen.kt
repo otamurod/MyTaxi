@@ -5,7 +5,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import org.koin.androidx.compose.koinViewModel
@@ -13,7 +12,7 @@ import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEffect
 import uz.otamurod.mytaxi.presentation.util.compose.rememberFlowWithLifecycle
 
 class HomeScreen : Screen {
-    @Preview(showBackground = true)
+
     @Composable
     override fun Content() {
         val viewModel: HomeViewModel = koinViewModel()
@@ -37,7 +36,11 @@ class HomeScreen : Screen {
         }
 
         Text(
-            text = "Hello MyTaxi!"
+            text = "Current Location at ${state.value.userLiveLocation?.timestamp} = ${state.value.userLiveLocation?.latitude}, ${state.value.userLiveLocation?.longitude}"
         )
+
+        state.value.userLiveLocation?.let { location ->
+            viewModel.saveLocation(location)
+        }
     }
 }

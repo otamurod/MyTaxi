@@ -3,4 +3,6 @@
     <string name="foreground_service_notification_title">Foreground Service Is Accessing Location</string>
     <string name="foreground_service_notification_description">MyTaxi app app is running in the background.</string>
     <string name="foreground_service_notification_channel_general_name">General notification</string>
+    <string name="location_permission_is_required">Location permission is required!</string>
+    <string name="notification_permission_is_required">Notification permission is required!</string>
 </resources>
