@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -83,8 +82,10 @@ class MainActivity : ComponentActivity() {
 
             else -> {
                 // No location access granted, service can't be started as it will crash
-                Toast.makeText(this,
-                    getString(R.string.location_permission_is_required), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.location_permission_is_required), Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -97,15 +98,13 @@ class MainActivity : ComponentActivity() {
             MyTaxiTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Surface(modifier = Modifier.padding(innerPadding)) {
-                        Navigator(
-                            screen = HomeScreen(
-                                viewModel = viewModel,
-                                onMapReady = { isReady ->
-                                    if (isReady) {
-                                        startForegroundServiceOnMapReady()
-                                    }
+                        HomeScreen(
+                            viewModel = viewModel,
+                            onMapReady = { isReady ->
+                                if (isReady) {
+                                    startForegroundServiceOnMapReady()
                                 }
-                            )
+                            }
                         )
                     }
                 }

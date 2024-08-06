@@ -26,13 +26,11 @@ import androidx.compose.ui.viewinterop.NoOpUpdate
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.bottomSheet.BottomSheetNavigator
 import com.mapbox.common.MapboxOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.annotation.annotations
@@ -47,221 +45,183 @@ import uz.otamurod.mytaxi.presentation.ui.home.components.HamburgerIcon
 import uz.otamurod.mytaxi.presentation.ui.home.components.MiddleRightIcons
 import uz.otamurod.mytaxi.presentation.ui.home.components.MiddleUpArrowIcon
 import uz.otamurod.mytaxi.presentation.ui.home.components.SpeedIndicator
-import uz.otamurod.mytaxi.presentation.ui.home.components.TabBar
+import uz.otamurod.mytaxi.presentation.ui.home.components.TabViewWithAnimation
 import uz.otamurod.mytaxi.presentation.util.compose.rememberFlowWithLifecycle
 
-class HomeScreen(
-    private val viewModel: HomeViewModel,
-    private val onMapReady: (Boolean) -> Unit
-) : Screen {
-    @SuppressLint("UseCompatLoadingForDrawables")
-    @OptIn(ExperimentalMaterial3Api::class, MapboxExperimental::class)
-    @Composable
-    override fun Content() {
-        MapboxOptions.accessToken = viewModel.getMapBoxDownloadsToken()
-        val context = LocalContext.current
-        val state = viewModel.state.collectAsStateWithLifecycle()
-        val effect = rememberFlowWithLifecycle(viewModel.effect)
+@SuppressLint("UseCompatLoadingForDrawables")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    viewModel: HomeViewModel, onMapReady: (Boolean) -> Unit
+) {
+    MapboxOptions.accessToken = viewModel.getMapBoxDownloadsToken()
+    val context = LocalContext.current
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val effect = rememberFlowWithLifecycle(viewModel.effect)
 
-        val mapBoxMap = remember { mutableStateOf<MapView?>(null) }
-        var pointAnnotationManager: PointAnnotationManager? by remember { mutableStateOf(null) }
+    val mapBoxMap = remember { mutableStateOf<MapView?>(null) }
+    var pointAnnotationManager: PointAnnotationManager? by remember { mutableStateOf(null) }
 
-        val scaffoldState = rememberBottomSheetScaffoldState()
-        val isExpanded = remember { mutableStateOf(false) }
-        val isMiddleItemsVisible = remember { mutableStateOf(true) }
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val isExpanded = remember { mutableStateOf(false) }
+    val isMiddleItemsVisible = remember { mutableStateOf(true) }
 
-        val mapZoomLevel = remember { mutableStateOf(15.0) }
-        val point = Point.fromLngLat(
-            state.value.userLiveLocation?.longitude ?: 39.0,
-            state.value.userLiveLocation?.latitude ?: 41.0
-        )
-        val marker = remember(context) { context.getDrawable(R.drawable.car_marker)!!.toBitmap() }
+    val mapZoomLevel = remember { mutableStateOf(15.0) }
+    val point = Point.fromLngLat(
+        state.value.userLiveLocation?.longitude ?: 39.0,
+        state.value.userLiveLocation?.latitude ?: 41.0
+    )
+    val marker = remember(context) { context.getDrawable(R.drawable.car_marker)!!.toBitmap() }
 
-        if (state.value.isMapReady) {
-            onMapReady(true)
-        }
+    if (state.value.isMapReady) {
+        onMapReady(true)
+    }
 
-        state.value.userLiveLocation?.let { location ->
-            viewModel.saveLocation(location)
-        }
+    state.value.userLiveLocation?.let { location ->
+        viewModel.saveLocation(location)
+    }
 
-        BottomSheetNavigator {
-            BottomSheetScaffold(
-                scaffoldState = scaffoldState,
-                sheetContent = { BottomSheetContent(isMiddleItemsVisible.value) },
-                sheetPeekHeight = if (isMiddleItemsVisible.value) 110.dp else 210.dp,
-                sheetShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)
-            ) {
-                ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                    val (map, hamburger, tabs, speed, upArrow, plusMinusNav) = createRefs()
+    BottomSheetNavigator {
+        BottomSheetScaffold(
+            scaffoldState = scaffoldState,
+            sheetContent = { BottomSheetContent(isMiddleItemsVisible.value) },
+            sheetPeekHeight = if (isMiddleItemsVisible.value) 110.dp else 210.dp,
+            sheetShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)
+        ) {
+            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+                val (map, hamburger, tabs, speed, upArrow, plusMinusNav) = createRefs()
 
-                    // MapBox Implementation
-                    AndroidView(
-                        factory = {
-                            MapView(it).also { mapView ->
-                                mapBoxMap.value = mapView
-                                mapView.mapboxMap.loadStyle(Style.MAPBOX_STREETS)
-                                val annotationApi = mapView.annotations
+                // MapBox Implementation
+                AndroidView(factory = {
+                    MapView(it).also { mapView ->
+                        mapBoxMap.value = mapView
+                        mapView.mapboxMap.loadStyle(Style.MAPBOX_STREETS)
+                        val annotationApi = mapView.annotations
 
-                                pointAnnotationManager =
-                                    annotationApi.createPointAnnotationManager()
+                        pointAnnotationManager = annotationApi.createPointAnnotationManager()
 
-                                mapView.mapboxMap.subscribeMapLoaded(
-                                    mapLoadedCallback = {
-                                        sendMapReady(isMapReady = true)
-                                    }
-                                )
+                        mapView.mapboxMap.subscribeMapLoaded(mapLoadedCallback = {
+                            sendMapReady(viewModel = viewModel, isMapReady = true)
+                        })
 
-                                mapView.mapboxMap.addOnMapClickListener(
-                                    onMapClickListener = {
-                                        toggleUIVisibility(isExpanded, isMiddleItemsVisible)
-                                        true
-                                    }
-                                )
-                            }
-                        },
-                        update = { mapView ->
-                            if (point != null) {
-                                pointAnnotationManager?.let {
-                                    it.deleteAll()
-                                    val pointAnnotationOptions = PointAnnotationOptions()
-                                        .withPoint(point)
-                                        .withIconImage(marker)
-
-                                    it.create(pointAnnotationOptions)
-                                }
-                                mapView.mapboxMap
-                                    .flyTo(
-                                        flyCameraToLiveLocation(mapZoomLevel, state)
-                                    )
-                            }
-                            NoOpUpdate
-                        },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .constrainAs(map) {
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }
-                            .clickable {
-                                toggleUIVisibility(isExpanded, isMiddleItemsVisible)
-                            }
-                    )
-
-                    // Hamburger Icon
-                    HamburgerIcon(
-                        modifier = Modifier
-                            .padding(start = 16.dp, top = 16.dp)
-                            .size(56.dp)
-                            .constrainAs(hamburger) {
-                                top.linkTo(parent.top)
-                                start.linkTo(parent.start)
-                            }
-                    )
-
-                    val activeTab = remember { mutableStateOf(context.getString(R.string.faol)) }
-
-                    // Tabs for Busy and Active
-                    TabBar(
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                            .height(56.dp)
-                            .constrainAs(tabs) {
-                                top.linkTo(parent.top)
-                                start.linkTo(hamburger.end)
-                                end.linkTo(speed.start)
-                            },
-                        activeTab = activeTab
-                    )
-
-                    // Speed Text (Top-Right)
-                    SpeedIndicator(
-                        modifier = Modifier
-                            .padding(end = 16.dp, top = 16.dp)
-                            .size(56.dp)
-                            .constrainAs(speed) {
-                                top.linkTo(parent.top)
-                                end.linkTo(parent.end)
-                            }
-                    )
-
-                    // Up Arrow (Middle-Left)
-                    if (isMiddleItemsVisible.value) {
-                        MiddleUpArrowIcon(
-                            modifier = Modifier
-                                .padding(start = 16.dp)
-                                .size(56.dp)
-                                .constrainAs(upArrow) {
-                                    start.linkTo(parent.start)
-                                    bottom.linkTo(map.bottom)
-                                    top.linkTo(map.top)
-                                }
-                        )
+                        mapView.mapboxMap.addOnMapClickListener(onMapClickListener = {
+                            toggleUIVisibility(isExpanded, isMiddleItemsVisible)
+                            true
+                        })
                     }
+                }, update = { mapView ->
+                    if (point != null) {
+                        pointAnnotationManager?.let {
+                            it.deleteAll()
+                            val pointAnnotationOptions =
+                                PointAnnotationOptions().withPoint(point).withIconImage(marker)
 
-                    // Plus, Minus, Navigator (Middle-Right)
-                    if (isMiddleItemsVisible.value) {
-                        MiddleRightIcons(
-                            modifier = Modifier
-                                .padding(end = 16.dp)
-                                .width(56.dp)
-                                .constrainAs(plusMinusNav) {
-                                    end.linkTo(parent.end)
-                                    top.linkTo(upArrow.top)
-                                },
-                            onZoomIn = {
-                                mapZoomLevel.value += 1.0
-                            },
-                            onZoomOut = {
-                                if (mapZoomLevel.value > 1) {
-                                    mapZoomLevel.value -= 1.0
-                                }
-                            },
-                            onNavigator = {
-                                mapBoxMap.value?.let {
-                                    it.mapboxMap
-                                        .flyTo(
-                                            flyCameraToLiveLocation(mapZoomLevel, state)
-                                        )
-                                }
-                            }
-                        )
+                            it.create(pointAnnotationOptions)
+                        }
+                        mapView.mapboxMap.flyTo(
+                                flyCameraToLiveLocation(mapZoomLevel, state)
+                            )
                     }
+                    NoOpUpdate
+                }, modifier = Modifier
+                    .fillMaxSize()
+                    .constrainAs(map) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .clickable {
+                        toggleUIVisibility(isExpanded, isMiddleItemsVisible)
+                    })
+
+                // Hamburger Icon
+                HamburgerIcon(modifier = Modifier
+                    .padding(start = 16.dp, top = 16.dp)
+                    .size(56.dp)
+                    .constrainAs(hamburger) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                    })
+
+                val activeTab = remember { mutableStateOf(context.getString(R.string.faol)) }
+
+                // Tabs for Busy and Active
+                TabViewWithAnimation(modifier = Modifier
+                    .padding(top = 16.dp)
+                    .height(56.dp)
+                    .constrainAs(tabs) {
+                        top.linkTo(parent.top)
+                        start.linkTo(hamburger.end)
+                        end.linkTo(speed.start)
+                    })
+
+                // Speed Text (Top-Right)
+                SpeedIndicator(modifier = Modifier
+                    .padding(end = 16.dp, top = 16.dp)
+                    .size(56.dp)
+                    .constrainAs(speed) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
+                    })
+
+                // Up Arrow (Middle-Left)
+                if (isMiddleItemsVisible.value) {
+                    MiddleUpArrowIcon(modifier = Modifier
+                        .padding(start = 16.dp)
+                        .size(56.dp)
+                        .constrainAs(upArrow) {
+                            start.linkTo(parent.start)
+                            bottom.linkTo(map.bottom)
+                            top.linkTo(map.top)
+                        })
+                }
+
+                // Plus, Minus, Navigator (Middle-Right)
+                if (isMiddleItemsVisible.value) {
+                    MiddleRightIcons(modifier = Modifier
+                        .padding(end = 16.dp)
+                        .width(56.dp)
+                        .constrainAs(plusMinusNav) {
+                            end.linkTo(parent.end)
+                            top.linkTo(upArrow.top)
+                        }, onZoomIn = {
+                        mapZoomLevel.value += 1.0
+                    }, onZoomOut = {
+                        if (mapZoomLevel.value > 1) {
+                            mapZoomLevel.value -= 1.0
+                        }
+                    }, onNavigator = {
+                        mapBoxMap.value?.let {
+                            it.mapboxMap.flyTo(
+                                    flyCameraToLiveLocation(mapZoomLevel, state)
+                                )
+                        }
+                    })
                 }
             }
         }
     }
+}
 
-    private fun flyCameraToLiveLocation(
-        mapZoomLevel: MutableState<Double>,
-        state: State<HomeScreenReducer.HomeState>
-    ): CameraOptions {
-        return CameraOptions.Builder().zoom(mapZoomLevel.value).center(
-            Point.fromLngLat(
-                state.value.userLiveLocation?.longitude
-                    ?: 39.0,
-                state.value.userLiveLocation?.latitude
-                    ?: 41.0
-            )
+private fun flyCameraToLiveLocation(
+    mapZoomLevel: MutableState<Double>, state: State<HomeScreenReducer.HomeState>
+): CameraOptions {
+    return CameraOptions.Builder().zoom(mapZoomLevel.value).center(
+        Point.fromLngLat(
+            state.value.userLiveLocation?.longitude ?: 39.0,
+            state.value.userLiveLocation?.latitude ?: 41.0
         )
-            .build()
-    }
+    ).build()
+}
 
-    private fun sendMapReady(isMapReady: Boolean) {
-        viewModel.sendEvent(HomeEvent.SetMapReady(isMapReady = isMapReady))
-    }
+private fun sendMapReady(viewModel: HomeViewModel, isMapReady: Boolean) {
+    viewModel.sendEvent(HomeEvent.SetMapReady(isMapReady = isMapReady))
+}
 
-    private fun toggleUIVisibility(
-        isExpanded: MutableState<Boolean>,
-        isMiddleItemsVisible: MutableState<Boolean>
-    ) {
-        isExpanded.value = !isExpanded.value
-        isMiddleItemsVisible.value = !isMiddleItemsVisible.value
-    }
-
-    companion object {
-        private const val TAG = "HomeScreen"
-    }
+private fun toggleUIVisibility(
+    isExpanded: MutableState<Boolean>, isMiddleItemsVisible: MutableState<Boolean>
+) {
+    isExpanded.value = !isExpanded.value
+    isMiddleItemsVisible.value = !isMiddleItemsVisible.value
 }
