@@ -1,5 +1,6 @@
 package uz.otamurod.mytaxi.presentation.ui
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -97,16 +98,19 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Surface(modifier = Modifier.padding(innerPadding)) {
                         Navigator(
-                            screen = HomeScreen()
+                            screen = HomeScreen(
+                                viewModel = viewModel,
+                                onMapReady = { isReady ->
+                                    if (isReady) {
+                                        startForegroundServiceOnMapReady()
+                                    }
+                                }
+                            )
                         )
                     }
                 }
             }
         }
-
-        checkAndRequestNotificationPermission()
-        startOrStopForegroundService()
-        tryToBindToServiceIfRunning()
     }
 
     private fun checkAndRequestNotificationPermission() {
@@ -114,9 +118,7 @@ class MainActivity : ComponentActivity() {
             when (ContextCompat.checkSelfPermission(
                 this, android.Manifest.permission.POST_NOTIFICATIONS
             )) {
-                PackageManager.PERMISSION_GRANTED -> {
-                    // permission already granted
-                }
+                PackageManager.PERMISSION_GRANTED -> {}
 
                 else -> {
                     notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -125,7 +127,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun startOrStopForegroundService() {
+    private fun startForegroundServiceOnMapReady() {
         val fineLocationGranted = ContextCompat.checkSelfPermission(
             this, android.Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
@@ -137,13 +139,17 @@ class MainActivity : ComponentActivity() {
         if (fineLocationGranted || coarseLocationGranted) {
             startForegroundService()
         } else {
-            locationPermissionRequest.launch(
-                arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
+            requestLocationPermission()
         }
+    }
+
+    private fun requestLocationPermission() {
+        locationPermissionRequest.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
     }
 
     private fun startForegroundService() {
@@ -152,10 +158,7 @@ class MainActivity : ComponentActivity() {
                     this, android.Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                Toast.makeText(this,
-                    getString(R.string.notification_permission_is_required), Toast.LENGTH_SHORT)
-                    .show()
-                return
+                checkAndRequestNotificationPermission()
             }
         }
 
@@ -166,7 +169,6 @@ class MainActivity : ComponentActivity() {
         } else {
             startService(serviceIntent)
         }
-
         tryToBindToServiceIfRunning()
     }
 
@@ -196,7 +198,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService(serviceConnection)
-        startOrStopForegroundService()
+        locationForegroundService?.stopForegroundService()
     }
 
     companion object {

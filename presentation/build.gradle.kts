@@ -48,6 +48,7 @@ android {
 dependencies {
 
     implementation(project(":domain"))
+    implementation(project(":specs"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -58,6 +59,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.constraintlayout.compose)
 
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.tab.navigator)
@@ -69,6 +72,10 @@ dependencies {
     implementation(libs.koin.android.compose)
     implementation(libs.play.services.location)
     implementation(libs.kotlinx.datetime)
+
+    implementation(libs.maps.android)
+    implementation(libs.maps.compose)
+    // implementation(libs.maps.plugin.annotation)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

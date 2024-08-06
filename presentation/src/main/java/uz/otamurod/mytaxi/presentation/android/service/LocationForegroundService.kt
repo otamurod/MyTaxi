@@ -28,11 +28,9 @@ import kotlin.time.Duration.Companion.seconds
 
 class LocationForegroundService : Service() {
     private val binder = LocalBinder()
-
     private val coroutineScope = CoroutineScope(Job())
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-
     private val _locationFlow = MutableStateFlow<Location?>(null)
     var locationFlow: StateFlow<Location?> = _locationFlow
 
@@ -110,9 +108,9 @@ class LocationForegroundService : Service() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             fusedLocationClient.requestLocationUpdates(
-                LocationRequest.Builder(
-                    LOCATION_UPDATES_INTERVAL_MS
-                ).build(), locationCallback, Looper.getMainLooper()
+                LocationRequest.Builder(LOCATION_UPDATES_INTERVAL_MS).build(),
+                locationCallback,
+                Looper.getMainLooper()
             )
         }
     }

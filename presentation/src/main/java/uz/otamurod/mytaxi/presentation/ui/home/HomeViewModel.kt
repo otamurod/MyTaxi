@@ -9,9 +9,11 @@ import uz.otamurod.mytaxi.presentation.ui.base.BaseViewModel
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEffect
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEvent
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeState
+import uz.otamurod.mytaxi.specs.buildconfig.MyTaxiAppBuildConfig
 
 class HomeViewModel(
-    private val liveLocationInteractor: LiveLocationInteractor
+    private val liveLocationInteractor: LiveLocationInteractor,
+    private val myTaxiAppBuildConfig: MyTaxiAppBuildConfig
 ) : BaseViewModel<HomeState, HomeEvent, HomeEffect>(
     initialState = HomeState.initial(),
     reducer = HomeScreenReducer()
@@ -23,5 +25,9 @@ class HomeViewModel(
                 liveLocation = location
             )
         }
+    }
+
+    fun getMapBoxDownloadsToken(): String {
+        return myTaxiAppBuildConfig.mapBoxDownloadsToken
     }
 }

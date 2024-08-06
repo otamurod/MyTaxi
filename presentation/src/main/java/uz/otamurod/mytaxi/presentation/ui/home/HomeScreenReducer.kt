@@ -9,11 +9,12 @@ class HomeScreenReducer :
 
     @Immutable
     data class HomeState(
-        val isLoading: Boolean,
+        val isMapReady: Boolean,
         val isActiveTabOpen: Boolean,
         val isNetworkAvailable: Boolean,
         val isGPSEnabled: Boolean,
         val isLocationPermissionGranted: Boolean,
+        val isNotificationPermissionGranted: Boolean,
         val isLocationAccessing: Boolean,
         val userLiveLocation: LiveLocation?,
         val mapZoomLevel: Float,
@@ -24,11 +25,12 @@ class HomeScreenReducer :
         companion object {
             fun initial(): HomeState {
                 return HomeState(
-                    isLoading = true,
+                    isMapReady = false,
                     isActiveTabOpen = false,
                     isNetworkAvailable = false,
                     isGPSEnabled = false,
                     isLocationPermissionGranted = false,
+                    isNotificationPermissionGranted = false,
                     isLocationAccessing = false,
                     userLiveLocation = null,
                     mapZoomLevel = 1.0f,
@@ -41,7 +43,7 @@ class HomeScreenReducer :
 
     @Immutable
     sealed class HomeEvent : Reducer.ViewEvent {
-        data class SetLoading(val isLoading: Boolean) : HomeEvent()
+        data class SetMapReady(val isMapReady: Boolean) : HomeEvent()
         data class SwitchTab(val isActiveTab: Boolean) : HomeEvent()
         data class ChangeMapZoom(val zoom: Float) : HomeEvent()
         data class ShowUserLocation(val liveLocation: LiveLocation) : HomeEvent()
@@ -49,6 +51,7 @@ class HomeScreenReducer :
         data class ToggleBottomDialog(val shouldDisplay: Boolean) : HomeEvent()
         data class ToggleMapItemsVisibility(val shouldHideItems: Boolean) : HomeEvent()
         data class GrantLocationPermission(val isGranted: Boolean) : HomeEvent()
+        data class GrantNotificationPermission(val isGranted: Boolean) : HomeEvent()
     }
 
     @Immutable
@@ -59,8 +62,8 @@ class HomeScreenReducer :
 
     override fun reduce(previousState: HomeState, event: HomeEvent): Pair<HomeState, HomeEffect?> {
         val newState = when (event) {
-            is HomeEvent.SetLoading -> {
-                previousState.copy(isLoading = event.isLoading)
+            is HomeEvent.SetMapReady -> {
+                previousState.copy(isMapReady = event.isMapReady)
             }
 
             is HomeEvent.SwitchTab -> {
@@ -89,6 +92,9 @@ class HomeScreenReducer :
 
             is HomeEvent.GrantLocationPermission -> {
                 previousState.copy(isLocationPermissionGranted = event.isGranted)
+            }
+            is HomeEvent.GrantNotificationPermission -> {
+                previousState.copy(isNotificationPermissionGranted = event.isGranted)
             }
         }
 

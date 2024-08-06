@@ -15,10 +15,14 @@ kotlinxDatetime = "0.6.0"
 ksp = "1.9.24-1.0.20"
 koin = "3.5.3"
 koinCompose = "3.5.3"
+pluginAnnotation = "10.7.0"
 room = "2.6.1"
 coroutines = "1.8.0"
 voyager = "1.0.0-rc08"
 playServicesLocation = "21.3.0"
+maps = "11.5.1"
+materialIconsExtendedAndroid = "1.6.8"
+constraintlayoutCompose = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,6 +56,11 @@ voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.
 voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+maps-android = { module = "com.mapbox.maps:android", version.ref = "maps" }
+maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "maps" }
+maps-plugin-annotation = { module = "com.mapbox.maps:plugin-annotation", version.ref = "maps" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
+androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
