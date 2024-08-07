@@ -2,10 +2,11 @@ package uz.otamurod.mytaxi.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light
 val Green = Color(0xFF80ED99)
 val Red = Color(0xFFE05656)
 val ImmutableDark = Color(0xFF121212)
+
+// Light
 val PrimaryLight = Color(0xFFFFFFFF)
 val OnPrimaryLight = Color(0xFF121212)
 val SecondaryLight = Color(0xFFF5F6F9)
@@ -32,3 +33,7 @@ val DarkSurfaceVariant = Color(0xFF242424)
 val OnDarkSurfaceVariant = Color(0xFF999999)
 val DarkAccent = Color(0xFF4A91FB)
 val DarkDivider = Color(0xFF3E3E3E)
+
+//Sheet Drag Handle Color
+val LightSheetDragHandle = Color(0x80000000)
+val DarkSheetDragHandle = Color(0xB3FFFFFF)

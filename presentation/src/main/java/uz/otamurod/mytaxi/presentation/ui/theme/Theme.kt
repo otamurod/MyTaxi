@@ -22,7 +22,8 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = DarkSurfaceVariant,
     onSurfaceVariant = OnDarkSurfaceVariant,
     tertiary = DarkAccent,
-    outline = DarkDivider
+    outline = DarkDivider,
+    outlineVariant = DarkSheetDragHandle
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -37,7 +38,8 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = LightSurfaceVariant,
     onSurfaceVariant = OnLightSurfaceVariant,
     tertiary = LightAccent,
-    outline = LightDivider
+    outline = LightDivider,
+    outlineVariant = LightSheetDragHandle
 )
 
 @Composable

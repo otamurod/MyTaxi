@@ -1,7 +1,14 @@
 package uz.otamurod.mytaxi.presentation.ui.home
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -20,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -63,9 +72,16 @@ fun HomeScreen(
     val mapBoxMap = remember { mutableStateOf<MapView?>(null) }
     var pointAnnotationManager: PointAnnotationManager? by remember { mutableStateOf(null) }
 
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val isExpanded = remember { mutableStateOf(false) }
-    val isMiddleItemsVisible = remember { mutableStateOf(true) }
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = false
+        )
+    )
+    val isBottomSheetExpanded = remember { mutableStateOf(false) }
+    val animatedBottomSheetHeight by animateDpAsState(
+        targetValue = if (isBottomSheetExpanded.value) 216.dp else 126.dp,
+        animationSpec = tween(durationMillis = 500), label = ""
+    )
 
     val mapZoomLevel = remember { mutableStateOf(15.0) }
     val point = Point.fromLngLat(
@@ -73,6 +89,7 @@ fun HomeScreen(
         state.value.userLiveLocation?.latitude ?: 41.0
     )
     val marker = remember(context) { context.getDrawable(R.drawable.car_marker)!!.toBitmap() }
+    val isDarkTheme = isSystemInDarkTheme()
 
     if (state.value.isMapReady) {
         LaunchedEffect(state.value.isMapReady) {
@@ -87,9 +104,16 @@ fun HomeScreen(
     BottomSheetNavigator {
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
-            sheetContent = { BottomSheetContent(isMiddleItemsVisible.value) },
-            sheetPeekHeight = if (isMiddleItemsVisible.value) 110.dp else 210.dp,
-            sheetShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)
+            sheetContent = {
+                BottomSheetContent(isBottomSheetExpanded.value)
+            },
+            sheetPeekHeight = animatedBottomSheetHeight,
+            sheetShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
+            sheetDragHandle = null,
+            sheetContainerColor = Color.Transparent,
+            containerColor = Color.Transparent,
+            sheetShadowElevation = 0.dp,
+            sheetTonalElevation = 0.dp,
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
                 val (map, hamburger, tabs, speed, upArrow, plusMinusNav) = createRefs()
@@ -98,7 +122,8 @@ fun HomeScreen(
                 AndroidView(factory = {
                     MapView(it).also { mapView ->
                         mapBoxMap.value = mapView
-                        mapView.mapboxMap.loadStyle(Style.MAPBOX_STREETS)
+                        setMapStyle(mapView, isDarkTheme)
+
                         val annotationApi = mapView.annotations
 
                         pointAnnotationManager = annotationApi.createPointAnnotationManager()
@@ -108,11 +133,12 @@ fun HomeScreen(
                         })
 
                         mapView.mapboxMap.addOnMapClickListener(onMapClickListener = {
-                            toggleUIVisibility(isExpanded, isMiddleItemsVisible)
+                            toggleMapControllerVisibility(isBottomSheetExpanded)
                             true
                         })
                     }
                 }, update = { mapView ->
+
                     if (point != null) {
                         pointAnnotationManager?.let {
                             it.deleteAll()
@@ -133,9 +159,6 @@ fun HomeScreen(
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                    }
-                    .clickable {
-                        toggleUIVisibility(isExpanded, isMiddleItemsVisible)
                     })
 
                 // Hamburger Icon
@@ -147,17 +170,16 @@ fun HomeScreen(
                         start.linkTo(parent.start)
                     })
 
-                val activeTab = remember { mutableStateOf(context.getString(R.string.faol)) }
-
                 // Tabs for Busy and Active
-                TabViewWithAnimation(modifier = Modifier
-                    .padding(top = 16.dp)
-                    .height(56.dp)
-                    .constrainAs(tabs) {
-                        top.linkTo(parent.top)
-                        start.linkTo(hamburger.end)
-                        end.linkTo(speed.start)
-                    })
+                TabViewWithAnimation(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .height(56.dp)
+                        .constrainAs(tabs) {
+                            top.linkTo(parent.top)
+                            start.linkTo(hamburger.end)
+                            end.linkTo(speed.start)
+                        })
 
                 // Speed Text (Top-Right)
                 SpeedIndicator(modifier = Modifier
@@ -169,42 +191,77 @@ fun HomeScreen(
                     })
 
                 // Up Arrow (Middle-Left)
-                if (isMiddleItemsVisible.value) {
-                    MiddleUpArrowIcon(modifier = Modifier
-                        .padding(start = 16.dp)
-                        .size(56.dp)
+                AnimatedVisibility(
+                    visible = !isBottomSheetExpanded.value,
+                    enter = slideInHorizontally(
+                        initialOffsetX = { it / 2 - 16 },
+                        animationSpec = tween(durationMillis = 500)
+                    ) + fadeIn(animationSpec = tween(durationMillis = 500)),
+                    exit = slideOutHorizontally(
+                        targetOffsetX = { it / 2 - 16 },
+                        animationSpec = tween(durationMillis = 500)
+                    ) + fadeOut(animationSpec = tween(durationMillis = 500)),
+                    modifier = Modifier
                         .constrainAs(upArrow) {
                             start.linkTo(parent.start)
                             bottom.linkTo(map.bottom)
                             top.linkTo(map.top)
-                        })
+                        }
+                ) {
+                    MiddleUpArrowIcon(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .size(56.dp)
+                    )
                 }
 
                 // Plus, Minus, Navigator (Middle-Right)
-                if (isMiddleItemsVisible.value) {
-                    MiddleRightIcons(modifier = Modifier
-                        .padding(end = 16.dp)
-                        .width(56.dp)
+                AnimatedVisibility(
+                    visible = !isBottomSheetExpanded.value,
+                    enter = slideInHorizontally(animationSpec = tween(durationMillis = 500))
+                            + fadeIn(animationSpec = tween(durationMillis = 500)),
+                    exit = slideOutHorizontally(
+                        targetOffsetX = { -it / 2 + 16 },
+                        animationSpec = tween(durationMillis = 500)
+                    ) + fadeOut(animationSpec = tween(durationMillis = 500)),
+                    modifier = Modifier
                         .constrainAs(plusMinusNav) {
                             end.linkTo(parent.end)
                             top.linkTo(upArrow.top)
-                        }, onZoomIn = {
-                        mapZoomLevel.value += 1.0
-                    }, onZoomOut = {
-                        if (mapZoomLevel.value > 1) {
-                            mapZoomLevel.value -= 1.0
                         }
-                    }, onNavigator = {
-                        mapBoxMap.value?.let {
-                            it.mapboxMap.flyTo(
-                                flyCameraToLiveLocation(mapZoomLevel, state)
-                            )
-                        }
-                    })
+                ) {
+                    MiddleRightIcons(modifier = Modifier
+                        .padding(end = 16.dp)
+                        .width(56.dp),
+                        onZoomIn = {
+                            if (mapZoomLevel.value < 22) {
+                                mapZoomLevel.value += 1.0
+                            }
+                        }, onZoomOut = {
+                            if (mapZoomLevel.value > 1) {
+                                mapZoomLevel.value -= 1.0
+                            }
+                        }, onNavigator = {
+                            mapBoxMap.value?.let {
+                                it.mapboxMap.flyTo(
+                                    flyCameraToLiveLocation(mapZoomLevel, state)
+                                )
+                            }
+                        })
                 }
             }
         }
     }
+}
+
+fun setMapStyle(mapView: MapView, isDarkTheme: Boolean) {
+    val styleUri = if (isDarkTheme) {
+        Style.DARK
+    } else {
+        Style.MAPBOX_STREETS
+    }
+
+    mapView.mapboxMap.loadStyle(styleUri)
 }
 
 private fun flyCameraToLiveLocation(
@@ -222,9 +279,8 @@ private fun sendMapReady(viewModel: HomeViewModel, isMapReady: Boolean) {
     viewModel.sendEvent(HomeEvent.SetMapReady(isMapReady = isMapReady))
 }
 
-private fun toggleUIVisibility(
-    isExpanded: MutableState<Boolean>, isMiddleItemsVisible: MutableState<Boolean>
+private fun toggleMapControllerVisibility(
+    isExpanded: MutableState<Boolean>
 ) {
     isExpanded.value = !isExpanded.value
-    isMiddleItemsVisible.value = !isMiddleItemsVisible.value
 }

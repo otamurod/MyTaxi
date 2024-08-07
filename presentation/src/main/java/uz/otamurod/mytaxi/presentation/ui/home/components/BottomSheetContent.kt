@@ -1,6 +1,8 @@
 package uz.otamurod.mytaxi.presentation.ui.home.components
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -33,20 +36,35 @@ import uz.otamurod.mytaxi.presentation.R
 import uz.otamurod.mytaxi.presentation.ui.theme.MyTaxiTheme
 
 @Composable
-fun BottomSheetContent(isShort: Boolean) {
-    Surface(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(size = 12.dp)
-    ) {
-        Box(
-            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+fun BottomSheetContent(isExpanded: Boolean) {
+    val animatedHeight by animateDpAsState(
+        targetValue = if (isExpanded) 200.dp else 145.dp,
+        animationSpec = tween(durationMillis = 500), label = "BottomSheet Content Animation"
+    )
+
+    Column {
+        CustomSheetDragHandle()
+
+        Surface(
+            modifier = Modifier
+                .height(animatedHeight),
+            shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)
         ) {
-            LazyColumn {
-                itemsIndexed(items = rowItems) { index, rowItem ->
-                    RowItem(itemDetails = rowItem, index = index)
+            Surface(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(size = 12.dp)
+            ) {
+                Box(
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    LazyColumn {
+                        itemsIndexed(items = rowItems) { index, rowItem ->
+                            RowItem(itemDetails = rowItem, index = index)
+                        }
+                    }
                 }
             }
         }
@@ -110,11 +128,32 @@ fun RowItem(
     }
 }
 
-@Preview(name = "BottomSheetContent", uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "BottomSheetContent", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    name = "BottomSheetContent",
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "BottomSheetContent",
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun PreviewBottomSheetContent() {
     MyTaxiTheme {
-        BottomSheetContent(isShort = false)
+        BottomSheetContent(isExpanded = false)
+    }
+}
+
+@Preview(
+    name = "BottomSheetContent",
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "BottomSheetContent",
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun PreviewBottomSheetContentExpanded() {
+    MyTaxiTheme {
+        BottomSheetContent(isExpanded = true)
     }
 }
