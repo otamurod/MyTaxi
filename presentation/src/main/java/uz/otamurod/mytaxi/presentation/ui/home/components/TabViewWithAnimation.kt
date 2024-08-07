@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +60,13 @@ fun TabViewWithAnimation(
     }
 
     Card(
-        modifier = modifier.height(56.dp),
+        modifier = modifier
+            .height(56.dp)
+            .shadow(
+                elevation = 12.dp,
+                spotColor = MaterialTheme.colorScheme.onBackground,
+                shape = RoundedCornerShape(8.dp)
+            ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
     ) {
         TabRow(

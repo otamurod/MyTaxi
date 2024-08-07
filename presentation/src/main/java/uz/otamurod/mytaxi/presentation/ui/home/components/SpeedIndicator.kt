@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +34,12 @@ fun SpeedIndicator(
     val fontFamily = FontFamily(Font(R.font.inter_regular))
 
     Card(
-        modifier = modifier,
+        modifier = modifier
+            .shadow(
+                elevation = 12.dp,
+                spotColor = MaterialTheme.colorScheme.onBackground,
+                shape = RoundedCornerShape(8.dp)
+            ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
     ) {
         Surface(
