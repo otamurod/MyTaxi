@@ -22,6 +22,7 @@ voyager = "1.0.0-rc08"
 playServicesLocation = "21.3.0"
 maps = "11.5.1"
 constraintlayoutCompose = "1.0.1"
+accompanistSystemuicontroller = "0.32.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,6 +59,7 @@ maps-android = { module = "com.mapbox.maps:android", version.ref = "maps" }
 maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "maps" }
 maps-plugin-annotation = { module = "com.mapbox.maps:plugin-annotation", version.ref = "maps" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.bottomSheet.BottomSheetNavigator
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mapbox.common.MapboxOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -64,6 +66,8 @@ import uz.otamurod.mytaxi.presentation.util.compose.rememberFlowWithLifecycle
 fun HomeScreen(
     viewModel: HomeViewModel, onMapReady: (Boolean) -> Unit
 ) {
+    SetSystemBarColors()
+
     MapboxOptions.accessToken = viewModel.getMapBoxDownloadsToken()
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -252,6 +256,22 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+fun SetSystemBarColors() {
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = !isSystemInDarkTheme()
+
+    systemUiController.setStatusBarColor(
+        color = MaterialTheme.colorScheme.primary,
+        darkIcons = useDarkIcons
+    )
+
+    systemUiController.setNavigationBarColor(
+        color = MaterialTheme.colorScheme.primary,
+        darkIcons = useDarkIcons
+    )
 }
 
 fun setMapStyle(mapView: MapView, isDarkTheme: Boolean) {

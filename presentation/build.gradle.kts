@@ -63,7 +63,7 @@ dependencies {
 
     implementation(libs.voyager.navigator)
     implementation(libs.voyager.bottom.sheet.navigator)
-    implementation(libs.voyager.transitions)
+    implementation(libs.accompanist.systemuicontroller)
 
     implementation(libs.koin.core)
     implementation(libs.koin.android)
