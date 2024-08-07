@@ -12,6 +12,7 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -74,7 +75,9 @@ fun HomeScreen(
     val marker = remember(context) { context.getDrawable(R.drawable.car_marker)!!.toBitmap() }
 
     if (state.value.isMapReady) {
-        onMapReady(true)
+        LaunchedEffect(state.value.isMapReady) {
+            onMapReady(true)
+        }
     }
 
     state.value.userLiveLocation?.let { location ->
@@ -119,8 +122,8 @@ fun HomeScreen(
                             it.create(pointAnnotationOptions)
                         }
                         mapView.mapboxMap.flyTo(
-                                flyCameraToLiveLocation(mapZoomLevel, state)
-                            )
+                            flyCameraToLiveLocation(mapZoomLevel, state)
+                        )
                     }
                     NoOpUpdate
                 }, modifier = Modifier
@@ -194,8 +197,8 @@ fun HomeScreen(
                     }, onNavigator = {
                         mapBoxMap.value?.let {
                             it.mapboxMap.flyTo(
-                                    flyCameraToLiveLocation(mapZoomLevel, state)
-                                )
+                                flyCameraToLiveLocation(mapZoomLevel, state)
+                            )
                         }
                     })
                 }
