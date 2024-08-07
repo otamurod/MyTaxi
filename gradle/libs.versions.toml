@@ -15,9 +15,14 @@ kotlinxDatetime = "0.6.0"
 ksp = "1.9.24-1.0.20"
 koin = "3.5.3"
 koinCompose = "3.5.3"
+pluginAnnotation = "10.7.0"
 room = "2.6.1"
 coroutines = "1.8.0"
 voyager = "1.0.0-rc08"
+playServicesLocation = "21.3.0"
+maps = "11.5.1"
+constraintlayoutCompose = "1.0.1"
+accompanistSystemuicontroller = "0.32.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,8 +53,13 @@ coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ve
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 voyager-bottom-sheet-navigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyager" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
-voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+maps-android = { module = "com.mapbox.maps:android", version.ref = "maps" }
+maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "maps" }
+maps-plugin-annotation = { module = "com.mapbox.maps:plugin-annotation", version.ref = "maps" }
+androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
