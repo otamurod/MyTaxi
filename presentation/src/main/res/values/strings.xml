@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">MyTaxi</string>
+    <string name="foreground_service_notification_title">Orqa fonda Joylashuv ma\'lumoti olinmoqda.</string>
+    <string name="foreground_service_notification_description">MyTaxi ilovasi fonda ishlamoqda.</string>
+    <string name="foreground_service_notification_channel_general_name">Umumiy bildirishnoma</string>
+    <string name="location_permission_is_required">Joylashuvni aniqlashga ruxsat kerak!</string>
+    <string name="notification_permission_is_required">Bildirishnoma uchun ruxsat kerak!</string>
+    <string name="faol">Faol</string>
+    <string name="band">Band</string>
+    <string name="turn_on_internet">Internetingizni yoqing!</string>
+    <string name="internet_is_available">Internet mavjud</string>
+    <string name="gps_is_enabled">GPS yoqilgan</string>
+    <string name="turn_on_gps">GPS-ni yoqing!</string>
 </resources>
