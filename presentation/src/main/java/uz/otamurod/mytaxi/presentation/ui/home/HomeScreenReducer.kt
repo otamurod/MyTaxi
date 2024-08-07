@@ -46,6 +46,9 @@ class HomeScreenReducer :
         data class UpdateUserLocation(val liveLocation: LiveLocation) : HomeEvent()
         data class GrantLocationPermission(val isGranted: Boolean) : HomeEvent()
         data class GrantNotificationPermission(val isGranted: Boolean) : HomeEvent()
+        data class TurnOnGPS(val isGPSEnabled: Boolean, val message: String) : HomeEvent()
+        data class TurnOnInternet(val isNetworkAvailable: Boolean, val message: String) :
+            HomeEvent()
     }
 
     @Immutable
@@ -55,36 +58,46 @@ class HomeScreenReducer :
     }
 
     override fun reduce(previousState: HomeState, event: HomeEvent): Pair<HomeState, HomeEffect?> {
-        val newState = when (event) {
+        return when (event) {
             is HomeEvent.SetMapReady -> {
-                previousState.copy(isMapReady = event.isMapReady)
+                previousState.copy(isMapReady = event.isMapReady) to null
             }
 
             is HomeEvent.SwitchTab -> {
-                previousState.copy(isActiveTabOpen = event.isActiveTab)
+                previousState.copy(isActiveTabOpen = event.isActiveTab) to null
             }
 
             is HomeEvent.ChangeMapZoom -> {
-                previousState.copy(mapZoomLevel = event.zoom)
+                previousState.copy(mapZoomLevel = event.zoom) to null
             }
 
             is HomeEvent.ShowUserLocation -> {
-                previousState.copy(userLiveLocation = event.liveLocation)
+                previousState.copy(userLiveLocation = event.liveLocation) to null
             }
 
             is HomeEvent.UpdateUserLocation -> {
-                previousState.copy(userLiveLocation = event.liveLocation)
+                previousState.copy(userLiveLocation = event.liveLocation) to null
             }
 
             is HomeEvent.GrantLocationPermission -> {
-                previousState.copy(isLocationPermissionGranted = event.isGranted)
+                previousState.copy(isLocationPermissionGranted = event.isGranted) to null
             }
 
             is HomeEvent.GrantNotificationPermission -> {
-                previousState.copy(isNotificationPermissionGranted = event.isGranted)
+                previousState.copy(isNotificationPermissionGranted = event.isGranted) to null
+            }
+
+            is HomeEvent.TurnOnGPS -> {
+                previousState.copy(
+                    errorMessage = event.message, isGPSEnabled = event.isGPSEnabled
+                ) to HomeEffect.ShowToast(message = event.message)
+            }
+
+            is HomeEvent.TurnOnInternet -> {
+                previousState.copy(
+                    errorMessage = event.message, isNetworkAvailable = event.isNetworkAvailable
+                ) to HomeEffect.ShowToast(message = event.message)
             }
         }
-
-        return newState to null
     }
 }

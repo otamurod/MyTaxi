@@ -1,6 +1,7 @@
 package uz.otamurod.mytaxi.presentation.ui.home
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -50,6 +51,7 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.addOnMapClickListener
+import kotlinx.coroutines.flow.collectLatest
 import uz.otamurod.mytaxi.presentation.R
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEvent
 import uz.otamurod.mytaxi.presentation.ui.home.components.BottomSheetContent
@@ -59,6 +61,9 @@ import uz.otamurod.mytaxi.presentation.ui.home.components.MiddleUpArrowIcon
 import uz.otamurod.mytaxi.presentation.ui.home.components.SpeedIndicator
 import uz.otamurod.mytaxi.presentation.ui.home.components.TabViewWithAnimation
 import uz.otamurod.mytaxi.presentation.util.compose.rememberFlowWithLifecycle
+import uz.otamurod.mytaxi.presentation.util.network.ConnectionState
+import uz.otamurod.mytaxi.presentation.util.network.observeConnectivityState
+import uz.otamurod.mytaxi.presentation.util.network.observeGPSState
 
 @SuppressLint("UseCompatLoadingForDrawables")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,6 +77,8 @@ fun HomeScreen(
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
+    val connectionState = observeConnectivityState()
+    val gpsState = observeGPSState()
 
     val mapBoxMap = remember { mutableStateOf<MapView?>(null) }
     var pointAnnotationManager: PointAnnotationManager? by remember { mutableStateOf(null) }
@@ -95,9 +102,59 @@ fun HomeScreen(
     val marker = remember(context) { context.getDrawable(R.drawable.car_marker)!!.toBitmap() }
     val isDarkTheme = isSystemInDarkTheme()
 
-    if (state.value.isMapReady) {
+    LaunchedEffect(effect) {
+        effect.collectLatest { action ->
+            when (action) {
+                is HomeScreenReducer.HomeEffect.ShowToast -> {
+                    Toast.makeText(context, action.message, Toast.LENGTH_LONG).show()
+                }
+
+                else -> {}
+            }
+        }
+    }
+
+    if (state.value.isMapReady && state.value.isGPSEnabled && state.value.isNetworkAvailable) {
         LaunchedEffect(state.value.isMapReady) {
             onMapReady(true)
+        }
+    }
+
+    LaunchedEffect(connectionState) {
+        when (connectionState) {
+            ConnectionState.Unavailable -> viewModel.sendEventForEffect(
+                HomeEvent.TurnOnInternet(
+                    isNetworkAvailable = false,
+                    message = "Please turn on your Internet!"
+                )
+            )
+
+            ConnectionState.Available -> {
+                viewModel.sendEventForEffect(
+                    HomeEvent.TurnOnInternet(
+                        isNetworkAvailable = true,
+                        message = "The Internet is available"
+                    )
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(gpsState) {
+        when (gpsState) {
+            true -> viewModel.sendEventForEffect(
+                HomeEvent.TurnOnGPS(
+                    isGPSEnabled = true,
+                    message = "GPS is enabled"
+                )
+            )
+
+            false -> viewModel.sendEventForEffect(
+                HomeEvent.TurnOnGPS(
+                    isGPSEnabled = false,
+                    message = "Please turn on your GPS!"
+                )
+            )
         }
     }
 
