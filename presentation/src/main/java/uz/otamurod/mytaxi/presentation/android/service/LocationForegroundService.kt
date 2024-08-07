@@ -117,6 +117,6 @@ class LocationForegroundService : Service() {
 
     companion object {
         private const val TAG = "ForegroundService"
-        private val LOCATION_UPDATES_INTERVAL_MS = 1.seconds.inWholeMilliseconds
+        private val LOCATION_UPDATES_INTERVAL_MS = 3.seconds.inWholeMilliseconds
     }
 }

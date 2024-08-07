@@ -3,7 +3,6 @@ package uz.otamurod.mytaxi.presentation.ui.home
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,8 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue.Expanded
+import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -50,7 +51,6 @@ import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-import com.mapbox.maps.plugin.gestures.addOnMapClickListener
 import kotlinx.coroutines.flow.collectLatest
 import uz.otamurod.mytaxi.presentation.R
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEvent
@@ -77,6 +77,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
+
     val connectionState = observeConnectivityState()
     val gpsState = observeGPSState()
 
@@ -84,15 +85,16 @@ fun HomeScreen(
     var pointAnnotationManager: PointAnnotationManager? by remember { mutableStateOf(null) }
 
     val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = false
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = PartiallyExpanded
         )
     )
     val isBottomSheetExpanded = remember { mutableStateOf(false) }
-    val animatedBottomSheetHeight by animateDpAsState(
-        targetValue = if (isBottomSheetExpanded.value) 216.dp else 126.dp,
-        animationSpec = tween(durationMillis = 500), label = ""
-    )
+    if (scaffoldState.bottomSheetState.currentValue == Expanded) {
+        isBottomSheetExpanded.value = true
+    } else if (scaffoldState.bottomSheetState.currentValue == PartiallyExpanded) {
+        isBottomSheetExpanded.value = false
+    }
 
     val mapZoomLevel = remember { mutableStateOf(15.0) }
     val point = Point.fromLngLat(
@@ -125,7 +127,7 @@ fun HomeScreen(
             ConnectionState.Unavailable -> viewModel.sendEventForEffect(
                 HomeEvent.TurnOnInternet(
                     isNetworkAvailable = false,
-                    message = "Please turn on your Internet!"
+                    message = context.getString(R.string.turn_on_internet)
                 )
             )
 
@@ -133,7 +135,7 @@ fun HomeScreen(
                 viewModel.sendEventForEffect(
                     HomeEvent.TurnOnInternet(
                         isNetworkAvailable = true,
-                        message = "The Internet is available"
+                        message = context.getString(R.string.internet_is_available)
                     )
                 )
             }
@@ -145,14 +147,14 @@ fun HomeScreen(
             true -> viewModel.sendEventForEffect(
                 HomeEvent.TurnOnGPS(
                     isGPSEnabled = true,
-                    message = "GPS is enabled"
+                    message = context.getString(R.string.gps_is_enabled)
                 )
             )
 
             false -> viewModel.sendEventForEffect(
                 HomeEvent.TurnOnGPS(
                     isGPSEnabled = false,
-                    message = "Please turn on your GPS!"
+                    message = context.getString(R.string.turn_on_gps)
                 )
             )
         }
@@ -165,10 +167,8 @@ fun HomeScreen(
     BottomSheetNavigator {
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
-            sheetContent = {
-                BottomSheetContent(isBottomSheetExpanded.value)
-            },
-            sheetPeekHeight = animatedBottomSheetHeight,
+            sheetContent = { BottomSheetContent() },
+            sheetPeekHeight = 126.dp,
             sheetShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
             sheetDragHandle = null,
             sheetContainerColor = Color.Transparent,
@@ -191,11 +191,6 @@ fun HomeScreen(
 
                         mapView.mapboxMap.subscribeMapLoaded(mapLoadedCallback = {
                             sendMapReady(viewModel = viewModel, isMapReady = true)
-                        })
-
-                        mapView.mapboxMap.addOnMapClickListener(onMapClickListener = {
-                            toggleMapControllerVisibility(isBottomSheetExpanded)
-                            true
                         })
                     }
                 }, update = { mapView ->
@@ -357,10 +352,4 @@ private fun flyCameraToLiveLocation(
 
 private fun sendMapReady(viewModel: HomeViewModel, isMapReady: Boolean) {
     viewModel.sendEvent(HomeEvent.SetMapReady(isMapReady = isMapReady))
-}
-
-private fun toggleMapControllerVisibility(
-    isExpanded: MutableState<Boolean>
-) {
-    isExpanded.value = !isExpanded.value
 }
