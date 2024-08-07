@@ -15,10 +15,8 @@ class HomeScreenReducer :
         val isGPSEnabled: Boolean,
         val isLocationPermissionGranted: Boolean,
         val isNotificationPermissionGranted: Boolean,
-        val isLocationAccessing: Boolean,
         val userLiveLocation: LiveLocation?,
         val mapZoomLevel: Float,
-        val itemsVisible: Boolean,
         val errorMessage: String?
     ) : Reducer.ViewState {
 
@@ -31,10 +29,8 @@ class HomeScreenReducer :
                     isGPSEnabled = false,
                     isLocationPermissionGranted = false,
                     isNotificationPermissionGranted = false,
-                    isLocationAccessing = false,
                     userLiveLocation = null,
                     mapZoomLevel = 1.0f,
-                    itemsVisible = true,
                     errorMessage = null
                 )
             }
@@ -48,8 +44,6 @@ class HomeScreenReducer :
         data class ChangeMapZoom(val zoom: Float) : HomeEvent()
         data class ShowUserLocation(val liveLocation: LiveLocation) : HomeEvent()
         data class UpdateUserLocation(val liveLocation: LiveLocation) : HomeEvent()
-        data class ToggleBottomDialog(val shouldDisplay: Boolean) : HomeEvent()
-        data class ToggleMapItemsVisibility(val shouldHideItems: Boolean) : HomeEvent()
         data class GrantLocationPermission(val isGranted: Boolean) : HomeEvent()
         data class GrantNotificationPermission(val isGranted: Boolean) : HomeEvent()
     }
@@ -82,17 +76,10 @@ class HomeScreenReducer :
                 previousState.copy(userLiveLocation = event.liveLocation)
             }
 
-            is HomeEvent.ToggleBottomDialog -> {
-                previousState.copy(itemsVisible = event.shouldDisplay)
-            }
-
-            is HomeEvent.ToggleMapItemsVisibility -> {
-                previousState.copy(itemsVisible = event.shouldHideItems)
-            }
-
             is HomeEvent.GrantLocationPermission -> {
                 previousState.copy(isLocationPermissionGranted = event.isGranted)
             }
+
             is HomeEvent.GrantNotificationPermission -> {
                 previousState.copy(isNotificationPermissionGranted = event.isGranted)
             }

@@ -33,6 +33,7 @@ import uz.otamurod.mytaxi.domain.model.LiveLocation
 import uz.otamurod.mytaxi.presentation.R
 import uz.otamurod.mytaxi.presentation.android.service.LocationForegroundService
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreen
+import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer
 import uz.otamurod.mytaxi.presentation.ui.home.HomeScreenReducer.HomeEvent.UpdateUserLocation
 import uz.otamurod.mytaxi.presentation.ui.home.HomeViewModel
 import uz.otamurod.mytaxi.presentation.ui.theme.MyTaxiTheme
@@ -64,28 +65,32 @@ class MainActivity : ComponentActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) {}
+    ) {
+        viewModel.sendEvent(HomeScreenReducer.HomeEvent.GrantNotificationPermission(isGranted = it))
+    }
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
-            permissions.getOrDefault(android.Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
                 // Precise location access granted, service can run
                 startForegroundService()
+                viewModel.sendEvent(HomeScreenReducer.HomeEvent.GrantLocationPermission(isGranted = true))
             }
 
-            permissions.getOrDefault(android.Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                 // Only approximate location access granted, service can still run.
                 startForegroundService()
+                viewModel.sendEvent(HomeScreenReducer.HomeEvent.GrantLocationPermission(isGranted = true))
             }
 
             else -> {
-                // No location access granted, service can't be started as it will crash
                 Toast.makeText(
                     this,
                     getString(R.string.location_permission_is_required), Toast.LENGTH_SHORT
                 ).show()
+                viewModel.sendEvent(HomeScreenReducer.HomeEvent.GrantLocationPermission(isGranted = false))
             }
         }
     }
@@ -115,12 +120,23 @@ class MainActivity : ComponentActivity() {
     private fun checkAndRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             when (ContextCompat.checkSelfPermission(
-                this, android.Manifest.permission.POST_NOTIFICATIONS
+                this, Manifest.permission.POST_NOTIFICATIONS
             )) {
-                PackageManager.PERMISSION_GRANTED -> {}
+                PackageManager.PERMISSION_GRANTED -> {
+                    viewModel.sendEvent(
+                        HomeScreenReducer.HomeEvent.GrantNotificationPermission(
+                            isGranted = true
+                        )
+                    )
+                }
 
                 else -> {
-                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    viewModel.sendEvent(
+                        HomeScreenReducer.HomeEvent.GrantNotificationPermission(
+                            isGranted = false
+                        )
+                    )
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
         }
@@ -128,11 +144,11 @@ class MainActivity : ComponentActivity() {
 
     private fun startForegroundServiceOnMapReady() {
         val fineLocationGranted = ContextCompat.checkSelfPermission(
-            this, android.Manifest.permission.ACCESS_FINE_LOCATION
+            this, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
         val coarseLocationGranted = ContextCompat.checkSelfPermission(
-            this, android.Manifest.permission.ACCESS_COARSE_LOCATION
+            this, Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
         if (fineLocationGranted || coarseLocationGranted) {
@@ -154,7 +170,7 @@ class MainActivity : ComponentActivity() {
     private fun startForegroundService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
-                    this, android.Manifest.permission.POST_NOTIFICATIONS
+                    this, Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 checkAndRequestNotificationPermission()
@@ -196,7 +212,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unbindService(serviceConnection)
+        if (serviceBoundState) {
+            unbindService(serviceConnection)
+        }
         locationForegroundService?.stopForegroundService()
     }
 

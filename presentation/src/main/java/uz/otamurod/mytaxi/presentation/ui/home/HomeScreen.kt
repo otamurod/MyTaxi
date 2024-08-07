@@ -183,7 +183,10 @@ fun HomeScreen(
                             top.linkTo(parent.top)
                             start.linkTo(hamburger.end)
                             end.linkTo(speed.start)
-                        })
+                        },
+                    isActiveTabOpen = {
+                        viewModel.sendEvent(HomeEvent.SwitchTab(it))
+                    })
 
                 // Speed Text (Top-Right)
                 SpeedIndicator(modifier = Modifier

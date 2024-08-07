@@ -49,7 +49,8 @@ import uz.otamurod.mytaxi.presentation.ui.theme.Red
 fun TabViewWithAnimation(
     modifier: Modifier = Modifier,
     selectedTabIndex: Int = 0,
-    pages: List<String> = listOf("Band", "Faol")
+    pages: List<String> = listOf("Band", "Faol"),
+    isActiveTabOpen: (Boolean) -> Unit
 ) {
     val fontFamily = FontFamily(Font(R.font.inter_regular))
     val scope = rememberCoroutineScope()
@@ -92,6 +93,7 @@ fun TabViewWithAnimation(
                     onClick = {
                         scope.launch {
                             selectedTab = index
+                            isActiveTabOpen(selectedTab == 1)
                         }
                     }
                 )
@@ -154,7 +156,8 @@ private fun PreviewTabBarActive() {
     MyTaxiTheme {
         TabViewWithAnimation(
             selectedTabIndex = 1,
-            pages = listOf("Band", "Faol")
+            pages = listOf("Band", "Faol"),
+            isActiveTabOpen = {}
         )
     }
 }
@@ -166,7 +169,8 @@ private fun PreviewTabBar() {
     MyTaxiTheme {
         TabViewWithAnimation(
             selectedTabIndex = 0,
-            pages = listOf("Band", "Faol")
+            pages = listOf("Band", "Faol"),
+            isActiveTabOpen = {}
         )
     }
 }
