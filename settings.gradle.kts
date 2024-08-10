@@ -30,8 +30,6 @@ dependencyResolutionManagement {
             credentials.username = "mapbox"
             // Use the secret token stored in keystore.properties as the password
             credentials.password = Properties().getProperty("MAPBOX_DOWNLOADS_SECRET_TOKEN")
-            // credentials.password = "sk.eyJ1Ijoib3RhbXVyb2QiLCJhIjoiY2x6Z2VpeWViMWRlcTJrczh3d3h6aGJhbSJ9.TEvt738_u4k6tkoR-4E7rA"
-            // credentials.password = providers.gradleProperty("MAPBOX_DOWNLOADS_SECRET_TOKEN").get()
         }
     }
 }
