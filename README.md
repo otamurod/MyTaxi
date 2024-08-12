@@ -28,8 +28,8 @@ You can find the project prototype over [here](https://www.figma.com/design/IwRI
 ## Setup Instructions
 1. Clone this repository:
    ```bash
-   git clone [your-repository-url]
-   cd [your-repository-directory]
+   git clone https://github.com/otamurod/MyTaxi.git
+   cd MyTaxi
 2. Open the project in Android Studio.
  
 3. Add keystore.properties gradle file at root project directory. Add your MAPBOX_DOWNLOADS_SECRET_TOKEN there
